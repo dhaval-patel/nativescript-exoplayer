@@ -141,6 +141,10 @@ export class HelloWorldModel extends Observable {
     this._videoPlayer.mute(false);
   }
 
+  public toggleFullScreen() {
+    this._videoPlayer.setFullScreen(true);
+  }
+
 
   /**
    * Get the video current time
@@ -182,7 +186,7 @@ export class HelloWorldModel extends Observable {
         x = this._videoPlayer.getCurrentTime();
         y = this._videoPlayer.getDuration();
       }
-      this.set("currentTime", x);
+      this.set("currentTime", parseInt(x, 10));
       this.set("videoDuration", y);
     }, 200);
     return trackInterval;

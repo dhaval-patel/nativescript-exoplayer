@@ -98,6 +98,9 @@ export class Video extends View {
     public static IMAGETYPESTEREOTOPBOTTOM = 2;
     public static IMAGETYPESTEREOLEFTRIGHT = 3;
 
+    public isFullScreen: boolean = false;
+    public originalParentView: any;
+    public originalParentViewIndex: number;
 }
 
 export const srcProperty = new Property<Video, any>({

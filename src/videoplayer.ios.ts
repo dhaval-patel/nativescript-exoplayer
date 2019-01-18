@@ -62,11 +62,10 @@ export class Video extends videoCommon.Video {
         this._videoFinished = false;
 
         // subtitles setup
-        if (this.enableSubtitles) {
+        // if (this.enableSubtitles) {
             this._subtitling = new ASBPlayerSubtitling();
-
             this._setupSubtitleLabel();
-        }
+        // }
     }
 
     get ios(): any {
@@ -333,6 +332,28 @@ export class Video extends videoCommon.Video {
         this._emit(videoCommon.Video.playbackStartEvent);
     }
 
+    setFullScreen (force: boolean) {
+        if (!this.isFullScreen) {
+            this.originalParentView = this.nativeView.superview;
+            this.originalParentViewIndex = this.originalParentView.subviews.indexOfObject(this.nativeView);
+            this._playerController.view.frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.height, UIScreen.mainScreen.bounds.size.width);
+            this.nativeView.window.addSubview(this.nativeView);
+            this.isFullScreen = true;
+        }
+        
+        setTimeout(() => {
+           this._playerController.view.transform = CGAffineTransformRotate(CGAffineTransformIdentity, ((force ? 90 : 0) * 3.14159265358979) / 180);
+           this._playerController.view.frame = CGRectMake(0, 0, UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height);
+       }, 0);
+    };
+            
+    hideFullScreen () {
+        if (this.isFullScreen) {
+            this._playerController.view.transform = CGAffineTransformRotate(CGAffineTransformIdentity, (0 * 3.14159265358979) / 180);
+            this.originalParentView.insertSubviewAtIndex(this.nativeView, this.originalParentViewIndex);
+            this.isFullScreen = false;
+        }
+    };
 }
 
 class PlayerObserverClass extends NSObject {

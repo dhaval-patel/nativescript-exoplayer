@@ -4,6 +4,7 @@ import { HelloWorldModel } from './main-view-model';
 import { isAndroid, device } from "platform";
 import { Color } from "color";
 import { android } from "application";
+import  {addOrientationApplier, enableRotation} from 'nativescript-orientation';
 
 // Event handler for Page "loaded" event attached in main-page.xml
 export function pageLoaded(args: EventData) {
@@ -16,4 +17,13 @@ export function pageLoaded(args: EventData) {
         window.setStatusBarColor(new Color("#d32f2f").android);
     }
 
+    enableRotation();
+
+    addOrientationApplier((args) => {
+        if (args.landscape) {
+            page.bindingContext._videoPlayer.setFullScreen();
+        } else {
+            page.bindingContext._videoPlayer.hideFullScreen();
+        }
+    });
 }

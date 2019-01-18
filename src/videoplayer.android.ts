@@ -46,6 +46,8 @@ export class Video extends videoCommon.Video {
     public TYPE = { DETECT: 0, SS: 1, DASH: 2, HLS: 3, OTHER: 4 };
 	public nativeView: any;
 
+	public originalParams: any;
+	public dialog: any;
 
 	constructor() {
 		super();
@@ -297,9 +299,6 @@ export class Video extends videoCommon.Video {
 			},
 			onTracksChanged: function (/* trackGroups, trackSelections */) {
 				// Do nothing
-			},
-			onSeekProcessed: function(){
-				// Do nothing
 			}
 		});
 		this.mediaPlayer.setVideoListener(vidListener);
@@ -467,7 +466,8 @@ export class Video extends videoCommon.Video {
 						com.google.android.exoplayer2.Format.NO_VALUE,
 						com.google.android.exoplayer2.Format.NO_VALUE,
 						"en",
-						null);
+						null,
+						com.google.android.exoplayer2.Format.OFFSET_SAMPLE_RELATIVE);
 
 					let subtitlesSrc = new com.google.android.exoplayer2.source.SingleSampleMediaSource(
 						subtitleUri,
@@ -689,5 +689,56 @@ export class Video extends videoCommon.Video {
 		this.fireCurrentTimeEvent();
 	}
 
+	setFullScreen (force: boolean) {
+        if (!this.isFullScreen) {
+			this.originalParentView = this.nativeView.getParent();
+			this.originalParentViewIndex = this.originalParentView.indexOfChild(this.nativeView);
+			this.originalParams = this.nativeView.getLayoutParams();
+			this._suspendLocation = this.getCurrentTime();
+			this.originalParentView.removeView(this.nativeView);
+
+			if (!this.dialog) {
+				this.dialog = new android.app.Dialog(this._context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+				this.dialog.setOnKeyListener(new android.content.DialogInterface.OnKeyListener({
+					onKey: (dialog, keyCode, event) => {
+						if (keyCode === android.view.KeyEvent.KEYCODE_BACK) {
+							this.hideFullScreen();
+							return true;
+						} 
+
+						return false;
+					}
+				}));
+			}
+
+			this.dialog.addContentView(this.nativeView, new android.view.ViewGroup.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT));
+			this.dialog.show();
+
+			this._openVideo();
+			this.seekToTime(this._suspendLocation);
+
+			if (force) {
+				this._context.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+			}
+
+			this.isFullScreen = true;
+		}
+    };
+
+    hideFullScreen () {
+        if (this.isFullScreen) {
+            this.dialog.hide();
+            this._suspendLocation = this.getCurrentTime();
+            this._context.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            this._context.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+
+            this.nativeView.getParent().removeView(this.nativeView);
+            this.originalParentView.addView(this.nativeView, this.originalParentViewIndex);
+            this.nativeView.setLayoutParams(this.originalParams);
+            this._openVideo();
+            this.seekToTime(this._suspendLocation);
+            this.isFullScreen = false;
+        }
+    };
 
 }
