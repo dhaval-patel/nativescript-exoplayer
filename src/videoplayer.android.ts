@@ -728,6 +728,7 @@ export class Video extends videoCommon.Video {
     hideFullScreen () {
         if (this.isFullScreen) {
             this.dialog.hide();
+            this.dialog.dismiss();
             this._suspendLocation = this.getCurrentTime();
             this._context.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             this._context.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
